@@ -9,6 +9,7 @@ typedef struct tipoFilme {
     int anoProducao;
     float bilheteria;
     struct tipoFilme *prox; //aponta para o próximo tipoFilme
+    struct tipoFilme *ant; //aponta para o anterior tipoFilme
 } TFilme;
 
 typedef struct tipoLista {
@@ -62,7 +63,7 @@ void insere(TLista *L){
 
     printf("\n\n\t=====| INSERE FILME |=====\n\n");
     printf("Informe TITULO: ");
-    fflush(stdin);
+    while (getchar() != '\n');
     fgets(novo->titulo, TAM, stdin);
 
     printf("\n\nANO DE PRODUCAO: ");
@@ -72,12 +73,15 @@ void insere(TLista *L){
     scanf("%f", &novo->bilheteria);
 
     novo->prox = NULL;
+    novo->ant = NULL;
 
     atual = L->inicio;
     while( atual != NULL){
         if(strcmp(atual->titulo, novo->titulo) == 1){
             novo->prox = atual;
-            
+            novo->ant = atual->ant;
+            atual->ant = novo;
+
             if (anterior != NULL) anterior->prox = novo;
 
             if(atual == L->inicio){
@@ -101,6 +105,7 @@ void insere(TLista *L){
         //inserir novo registro no fim da Lista;
         TFilme *ultimo = L->fim;
         ultimo->prox = novo;
+        novo->ant = ultimo;
         L->fim = novo;
     }//if
 
@@ -153,7 +158,7 @@ void exclui(TLista *L){
 
     printf("\n\n\t\t=====| EXCLUSAO |======\n\n");
     printf("\tInforme TITULO a ser EXCLUIDO: ");
-    fflush(stdin);
+    while (getchar() != '\n');
     fgets(titulo, TAM, stdin);
 
 
@@ -167,15 +172,23 @@ void exclui(TLista *L){
             if(anterior == NULL) {
                 //atual é o primeiro FILME da Lista
                 L->inicio = atual->prox;
+                if (L->inicio != NULL) {
+                    L->inicio->ant = NULL;
+                }
+
             } else {
-                anterior->prox = atual->prox;
+                anterior->prox = atual->prox; //atual é o FILME do meio ou do fim da Lista
+                
+                if (atual->prox != NULL) {
+                    atual->prox->ant = anterior;
+                }
             }//if
 
             free(atual);
 
             if(anterior != NULL){
                 if(anterior->prox == NULL){
-                   L->fim = atual;
+                   L->fim = anterior;
                 }
             }
 
